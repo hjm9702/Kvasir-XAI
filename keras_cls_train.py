@@ -1,5 +1,5 @@
 import numpy as np
-import sys, pickle
+import sys, pickle, csv
 
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
@@ -21,7 +21,6 @@ from tensorflow.keras.applications.xception import preprocess_input as Xception_
 
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
-
 
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -130,7 +129,7 @@ X_tst = preprocess_func(X_tst)
 
 
 
-print(':: training')
+print(':: training {} ::::'.format(model_list[model_id - 1]))
 for layer in base_model.layers: layer.trainable = True
 model.compile(optimizer = Adam(lr=1e-5), loss='categorical_crossentropy', metrics=['accuracy'])
 
@@ -146,3 +145,16 @@ mcp_save = ModelCheckpoint('models/kvasir_cls_'+model_list[model_id - 1]+'.h5', 
 model.fit_generator(data_flow, steps_per_epoch=np.ceil(len(X_trn)/batch_size), epochs=500, validation_data=(X_val, Y_val),
                    callbacks=[earlystopper, reduce_lr, mcp_save], verbose=1)
 
+# prediction
+print(':: prediction')
+#model = load_model('mnnet_cls_'+str(model_id)+'.h5')
+Y_tst_hat = model.predict(X_tst, batch_size=batch_size)
+accuracy = accuracy_score(np.argmax(Y_tst, 1), np.argmax(Y_tst_hat, 1))
+print(accuracy)
+
+#print(confusion_matrix(np.argmax(Y_tst, 1), np.argmax(Y_tst_hat, 1)))
+
+f = open('results' + '/accuracy_' + model_list[model_id - 1] + '.csv', 'w', newline='')
+with f:
+    writer = csv.writer(f)
+    writer.writerow([accuracy])
