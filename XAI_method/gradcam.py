@@ -36,7 +36,7 @@ if gpus:
 
 
 class GradCam():
-    def __init__(self, model, last_conv_layer_name, img_dim = 386):
+    def __init__(self, model, last_conv_layer_name, img_dim = 384):
         self.model = model
         self.last_conv_layer_name = last_conv_layer_name
         self.img_dim = img_dim
@@ -80,7 +80,7 @@ class GradCam():
     # X_tst, Y_tst are single image, maks (img_w, img_h, color_channel)
     def gradcam_single_auroc(self, X_tst, Y_tst):
         heatmap = self.make_gradcam_heatmap(X_tst)
-        heatmap = cv2.resize(heatmap, (self.image_dim, self.image_dim))
+        heatmap = cv2.resize(heatmap, (self.img_dim, self.img_dim))
         fpr, tpr, _ = roc_curve(Y_tst.ravel(), heatmap.ravel())
         roc_auc = auc(fpr, tpr)
         return roc_auc
@@ -95,25 +95,58 @@ class GradCam():
 
     # visualize heatmap on the image
     # the img_array must not be preprocessed
-    def gradcam_visualize(self, img_array, alpha):
+    def gradcam_visualize(self, img_array_org, Y_tst, alpha):
+        img_array = img_array_org.copy()
         heatmap = self.make_gradcam_heatmap(img_array)
         heatmap = cv2.resize(heatmap, (self.img_dim, self.img_dim))
         heatmap = np.uint8(255 * heatmap)
         heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
         heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
 
-        decoded_image = 111
+        decoded_image = self.deprocess_img(img_array)
         superimposed_img = (heatmap * alpha + decoded_image * (1 - alpha)).astype('uint8')
 
-        fig, axs = plt.subplots(1, 3, figsize=(3*12, 1*12))
+        fig, axs = plt.subplots(1, 4, figsize=(3*12, 1*12))
         axs[0].imshow(heatmap)
-        axs[0].set_title('GradCam heatmap')
+        axs[0].set_title('GradCam heatmap', fontsize = 30)
         axs[1].imshow(decoded_image)
-        axs[1].set_title('Input Image')
+        axs[1].set_title('Input Image', fontsize = 30)
         axs[2].imshow(superimposed_img)
-        axs[2].set_title('Superimposed Image')
+        axs[2].set_title('Superimposed Image', fontsize = 30)
+        axs[3].imshow(Y_tst)
+        axs[3].set_title('Mask', fontsize = 30)
 
         for ax in axs.flat:
             ax.label_outer()
 
         return heatmap, decoded_image, superimposed_img
+
+    def deprocess_img(self, img_array):
+        # Model : VGG19
+        if self.last_conv_layer_name == 'block5_conv4':
+            img_array[:, :, 0] += 103.939
+            img_array[:, :, 1] += 116.779
+            img_array[:, :, 2] += 123.68
+            img_array = img_array[:, :, ::-1]
+            img_array = np.clip(img_array, 0, 255).astype('uint8')
+
+        # Model : InceptiionV3
+        elif self.last_conv_layer_name == 'mixed10':
+            img_array /= 2.
+            img_array += 0.5
+            img_array *= 255.
+
+        # Model : ResNet50V2
+        elif self.last_conv_layer_name == 'conv5_block3_out':
+            img_array /= 2.
+            img_array += 0.5
+            img_array *= 255.
+
+        # Model : Xception
+        elif self.last_conv_layer_name == 'block14_sepconv2_act':
+            img_array /= 2.
+            img_array += 0.5
+            img_array *= 255.
+
+        return img_array
+
