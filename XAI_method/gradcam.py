@@ -36,13 +36,14 @@ if gpus:
 
 
 class GradCam():
-    def __init__(self, model, last_conv_layer_name, img_dim = 384):
+    def __init__(self, model, last_conv_layer_name, img_dim = 384, pred_index=None):
         self.model = model
         self.last_conv_layer_name = last_conv_layer_name
         self.img_dim = img_dim
+        self.pred_index = pred_index
 
     # pred_index = 7 for polyp class
-    def make_gradcam_heatmap(self, img_array, pred_index=None):
+    def make_gradcam_heatmap(self, img_array):
         # First, we create a model that maps the input image to the activations
         # of the last conv layer as well as the output predictions
         grad_model = tf.keras.models.Model(
@@ -53,8 +54,10 @@ class GradCam():
         # with respect to the activations of the last conv layer
         with tf.GradientTape() as tape:
             last_conv_layer_output, preds = grad_model(np.expand_dims(img_array, axis=0).astype('float32'))  # uint8 -> float32
-            if pred_index is None:
+            if self.pred_index is None:
                 pred_index = tf.argmax(preds[0])
+            else:
+                pred_index = self.pred_index
             class_channel = preds[:, pred_index]
 
         # This is the gradient of the output neuron (top predicted or chosen)
@@ -122,6 +125,7 @@ class GradCam():
         return heatmap, decoded_image, superimposed_img
 
     def deprocess_img(self, img_array):
+
         # Model : VGG19
         if self.last_conv_layer_name == 'block5_conv4':
             img_array[:, :, 0] += 103.939
@@ -135,18 +139,21 @@ class GradCam():
             img_array /= 2.
             img_array += 0.5
             img_array *= 255.
+            img_array = np.clip(img_array, 0, 255).astype('uint8')
 
         # Model : ResNet50V2
         elif self.last_conv_layer_name == 'conv5_block3_out':
             img_array /= 2.
             img_array += 0.5
             img_array *= 255.
+            img_array = np.clip(img_array, 0, 255).astype('uint8')
 
         # Model : Xception
         elif self.last_conv_layer_name == 'block14_sepconv2_act':
             img_array /= 2.
             img_array += 0.5
             img_array *= 255.
+            img_array = np.clip(img_array, 0, 255).astype('uint8')
 
         return img_array
 
