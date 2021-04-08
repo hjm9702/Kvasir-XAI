@@ -1,6 +1,38 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import numpy as np
+import sys, pickle, csv
+import cv2
+
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, auc, roc_curve
+
+import tensorflow as tf
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.models import Model, load_model
+from tensorflow.keras.layers import Dense
+
+from tensorflow.keras.applications.vgg19 import VGG19
+from tensorflow.keras.applications.vgg19 import preprocess_input as VGG19_preprocess
+from tensorflow.keras.applications.inception_v3 import InceptionV3
+from tensorflow.keras.applications.inception_v3 import preprocess_input as InceptionV3_preprocess
+from tensorflow.keras.applications.resnet_v2 import ResNet50V2
+from tensorflow.keras.applications.resnet_v2 import preprocess_input as ResNet50V2_preprocess
+from tensorflow.keras.applications.xception import Xception
+from tensorflow.keras.applications.xception import preprocess_input as Xception_preprocess
+
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+%matplotlib inline
+
+
+from skimage.segmentation import mark_boundaries
+from lime import lime_image
+import lime
 
 
 class XAI_lime():
