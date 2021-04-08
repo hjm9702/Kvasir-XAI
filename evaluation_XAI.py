@@ -26,6 +26,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCh
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
+from XAI_method.gradcam import GradCam
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
@@ -114,17 +115,27 @@ model_list = ["VGG19", "InceptionV3", "ResNet50V2", "Xception"]
 if model_id == 1:
     model = load_model('kvasir_cls_' + model_list[model_id - 1] + '.h')
     preprocess_func = VGG19_preprocess
+    last_conv_layer_name = 'block5_conv4'
 elif model_id == 2:
     model = load_model('kvasir_cls_' + model_list[model_id - 1] + '.h')
     preprocess_func = InceptionV3_preprocess
+    last_conv_layer_name = 'mixed10'
 elif model_id == 3:
     model = load_model('kvasir_cls_' + model_list[model_id - 1] + '.h')
     preprocess_func = ResNet50V2_preprocess
+    last_conv_layer_name = 'conv5_block3_out'
 elif model_id == 4:
     model = load_model('kvasir_cls_' + model_list[model_id - 1] + '.h')
     preprocess_func = Xception_preprocess
+    last_conv_layer_name = 'block14_sepconv2_act'
 
 # polyp dataset preprocessing
 X_tst_s = preprocess_func(X_tst_s)
+
+# evaluation
+
+gradcam = GradCam(model, last_conv_layer_name)
+
+gradcam_auroc = gradcam(X_tst_s, Y_tst_s)
 
 
