@@ -136,6 +136,7 @@ X_tst_s = preprocess_func(X_tst_s)
 
 gradcam = GradCam(model, last_conv_layer_name)
 
-gradcam_auroc = gradcam(X_tst_s, Y_tst_s)
+gradcam_auroc = gradcam.gradcam_total_auroc(X_tst_s, Y_tst_s)
+print("AUROC from GradCam: ", gradcam_auroc)
 
 
