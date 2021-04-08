@@ -38,8 +38,8 @@ if gpus:
 
 # load dataset
 
-#model_id = int(sys.argv[1])
-model_id = 3
+model_id = int(sys.argv[1])
+#model_id = 3
 
 image_dim = 384
 
