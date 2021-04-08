@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 from XAI_method.gradcam import GradCam
+from XAI_method.XAI_lime import XAI_lime
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
@@ -39,7 +40,7 @@ if gpus:
 # load dataset
 
 model_id = int(sys.argv[1])
-#model_id = 3
+xai_id = int(sys.argv[2])
 
 image_dim = 384
 
@@ -130,13 +131,25 @@ elif model_id == 4:
     last_conv_layer_name = 'block14_sepconv2_act'
 
 # polyp dataset preprocessing
-X_tst_s = preprocess_func(X_tst_s)
+X_tst_s_preprocessed = preprocess_func(X_tst_s)
 
 # evaluation
 
-gradcam = GradCam(model, last_conv_layer_name)
+if xai_id == 1:
+    gradcam = GradCam(model, last_conv_layer_name)
 
-gradcam_auroc = gradcam.gradcam_total_auroc(X_tst_s, Y_tst_s)
-print("AUROC from GradCam: ", gradcam_auroc)
+    gradcam_auroc = gradcam.gradcam_total_auroc(X_tst_s_preprocessed, Y_tst_s)
+    print("AUROC from GradCam: ", gradcam_auroc)
 
+
+elif xai_id == 2:
+    xai_lime = XAI_lime(model, model_list[model_id], preprocess_func)
+    lime_auroc = xai_lime.lime_total_auroc(X_tst_s, Y_tst_s)
+    print("AUROC from Lime with", model_list[model_id-1],':', lime_auroc)
+    
+    with open('./lime_auroc_'+model_list[model_id-1]+'.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow([lime_auroc])
+    
+    
 
