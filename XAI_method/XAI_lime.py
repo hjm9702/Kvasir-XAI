@@ -27,7 +27,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-%matplotlib inline
+#%matplotlib inline
 
 
 from skimage.segmentation import mark_boundaries
@@ -47,7 +47,7 @@ class XAI_lime():
     def _predict_fn(self, images):
         #function for input of explainer.explain_instance
         
-        return self.model.predict(images, batch_size=16)
+        return self.model.predict(images)
     
     def make_lime_heatmap(self, img):
         #Get explanation from lime
