@@ -114,19 +114,19 @@ X_trn_s, X_val_s, Y_trn_s, Y_val_s = train_test_split(X_trnval_s, Y_trnval_s, te
 # model load
 model_list = ["VGG19", "InceptionV3", "ResNet50V2", "Xception"]
 if model_id == 0:
-    model = load_model('D:/kvasir_cls/models/' + 'kvasir_cls_' + model_list[model_id - 1] + '.h5')
+    model = load_model('D:/kvasir_cls/models/' + 'kvasir_cls_' + model_list[model_id] + '.h5')
     preprocess_func = VGG19_preprocess
     last_conv_layer_name = 'block5_conv4'
 elif model_id == 1:
-    model = load_model('D:/kvasir_cls/models/' + 'kvasir_cls_' + model_list[model_id - 1] + '.h5')
+    model = load_model('D:/kvasir_cls/models/' + 'kvasir_cls_' + model_list[model_id] + '.h5')
     preprocess_func = InceptionV3_preprocess
     last_conv_layer_name = 'mixed10'
 elif model_id == 2:
-    model = load_model('D:/kvasir_cls/models/' + 'kvasir_cls_' + model_list[model_id - 1] + '.h5')
+    model = load_model('D:/kvasir_cls/models/' + 'kvasir_cls_' + model_list[model_id] + '.h5')
     preprocess_func = ResNet50V2_preprocess
     last_conv_layer_name = 'conv5_block3_out'
 elif model_id == 3:
-    model = load_model('D:/kvasir_cls/models/' + 'kvasir_cls_' + model_list[model_id - 1] + '.h5')
+    model = load_model('D:/kvasir_cls/models/' + 'kvasir_cls_' + model_list[model_id] + '.h5')
     preprocess_func = Xception_preprocess
     last_conv_layer_name = 'block14_sepconv2_act'
 
