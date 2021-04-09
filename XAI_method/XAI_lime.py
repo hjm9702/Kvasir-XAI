@@ -27,7 +27,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-#%matplotlib inline
+
 
 
 from skimage.segmentation import mark_boundaries
