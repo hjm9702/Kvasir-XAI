@@ -27,7 +27,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-%matplotlib inline
+#%matplotlib inline
 
 
 from skimage.segmentation import mark_boundaries
@@ -55,7 +55,11 @@ class XAI_lime():
         img_preprocessed = self.preprocess_func(img)
         explainer = lime_image.LimeImageExplainer()
         explanation = explainer.explain_instance(img_preprocessed.astype('double'), self._predict_fn, hide_color=0, num_samples=1000)
-        _, heatmap = explanation.get_image_and_mask(7, positive_only = True)
+        _, mask = explanation.get_image_and_mask(7, positive_only = True)
+        
+        dict_heatmap = dict(explanation.local_exp[7])
+        heatmap = np.vectorize(dict_heatmap.get)(explanation.segments)
+        
         #label_index = 7 for polyp class
         
         
