@@ -91,6 +91,7 @@ X_tst = np.concatenate((X_tst_no, X_tst_polyp), axis=0)
 Y_tst = np.concatenate((Y_tst_no, Y_tst_polyp), axis=0)
 Y_tst = enc.fit_transform(Y_tst)
 
+
 print('trn.shape', X_trn.shape, Y_trn.shape)
 print('val.shape', X_val.shape, Y_val.shape)
 print('tst.shape', X_tst.shape, Y_tst.shape)

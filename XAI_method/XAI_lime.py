@@ -42,14 +42,15 @@ class XAI_lime():
         self.model_name = model_name
         self.preprocess_func = preprocess_func
         self.img_dim = img_dim
+        self.explainer = lime_image.LimeImageExplainer()
         
     
     def make_lime_heatmap(self, img):
         #Get explanation from lime
         
         img_preprocessed = self.preprocess_func(img)
-        explainer = lime_image.LimeImageExplainer()
-        explanation = explainer.explain_instance(img_preprocessed.astype('double'), self.model.predict, hide_color=0, num_samples=1000)
+        #explainer = lime_image.LimeImageExplainer()
+        explanation = self.explainer.explain_instance(img_preprocessed.astype('double'), self.model.predict, hide_color=0, num_samples=1000)
         #_, mask = explanation.get_image_and_mask(7, positive_only = True)
         
         dict_heatmap = dict(explanation.local_exp[7])
@@ -63,26 +64,29 @@ class XAI_lime():
     
     def lime_single_auroc(self, X_tst, Y_tst):
         #Calculate auroc for each image and mask
-        img = X_tst.copy()
+        #img = X_tst.copy()
         
-        heatmap = self.make_lime_heatmap(img)
-        heatmap_copy = heatmap.copy()
-        fpr, tpr, _ = roc_curve(Y_tst.ravel(), heatmap_copy.ravel())
+        heatmap = self.make_lime_heatmap(X_tst)
+        #heatmap_copy = heatmap.copy()
+        fpr, tpr, _ = roc_curve(Y_tst.ravel(), heatmap.ravel())
         roc_auc = auc(fpr, tpr)
         
-        return heatmap, roc_auc
+        return roc_auc
     
     def lime_total_auroc(self, X_tst, Y_tst):
         #Calculate auroc for whole dataset
-        heatmap_list = []
-        auroc_list = []
-        
+        #heatmap_list = []
+        auroc_list = [self.lime_single_auroc(X_tst[i], Y_tst[i]) for i in range(len(X_tst))]
+
+        #auroc_list = []
+        '''
         for i in range(len(X_tst)):
-            heatmap, roc_auc = self.lime_single_auroc(X_tst[i], Y_tst[i])
-            
-            heatmap_list.append(heatmap)
+            roc_auc = self.lime_single_auroc(X_tst[i], Y_tst[i])
+
+            #heatmap = None
+            #heatmap_list.append(heatmap)
             auroc_list.append(roc_auc)
-        
+        '''
         #with open('./kvasir_lime_heatmaps_'+str(self.model_name)+'.pickle', 'wb') as f:
         #    pickle.dump(heatmap_list, f)
         
